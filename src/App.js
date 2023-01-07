@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import axios from 'axios';
+
 
 
 
@@ -23,10 +23,9 @@ const App = () => {
   useEffect(() => {
     // dohvatimo trenutne tečajeve preko API-ja
     const fetchRates = async () => {
-      const response = await axios.get(
+      const response = await fetch(
         `https://api.exchangerate.host/latest?base=${selectedCurrency1}&symbols=${selectedCurrency2}`
         );
-        
       const rates = await response.json();
     
       // izračunamo konvertirani iznos
