@@ -4,6 +4,7 @@ body {
   align-items: center;
   justify-content: center;
   height: 100vh;
+  background-color: #c8a3a374;
 }
 
 label {
@@ -54,4 +55,15 @@ input[readonly] {
   font-weight: bold;
   border-radius: 115px;
   text-align: center;
+}
+.iznos {
+
+  width: 100%;
+  font-weight: bold;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 115px;
+  font-size: 1rem;
+  text-align: center;
+  background-color: #ccc;
 }

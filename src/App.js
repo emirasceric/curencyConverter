@@ -1,64 +1,71 @@
-import React, { useState, useEffect } from 'react';
-import './App.css';
-
-
-
+import React, { useState, useEffect } from "react";
+import "./App.css";
 
 const App = () => {
-  // koristimo useState hook da bismo mogli mijenjati vrijednosti drop lista i inputa
-  const [selectedCurrency1, setSelectedCurrency1] = useState('EUR');
-  const [selectedCurrency2, setSelectedCurrency2] = useState('USD');
-  const [amount, setAmount] = useState('');
-  // koristimo useState hook da bismo mogli mijenjati rezultat konverzije i prikazati ga u output elementu
-  const [convertedAmount, setConvertedAmount] = useState('');
+  const [selectedCurrency1, setSelectedCurrency1] = useState("EUR");
+  const [selectedCurrency2, setSelectedCurrency2] = useState("USD");
+  const [amount, setAmount] = useState(1);
+  const [convertedAmount, setConvertedAmount] = useState("");
+  const [currencies, setCurrencies] = useState([]);
 
+  // Vaš API ključ
+  const apiKey = "PI5DYvZkXw79dcttXnne3ARnxaxfBGum";
 
-
-  // lista valuta
-  const currencies = ['EUR', 'USD', 'BAM', 'CHF', 'BTC'];
-
-
-
-  // useEffect hook se poziva svaki puta kada se promijene vrijednosti u state-u
   useEffect(() => {
-    // dohvatimo trenutne tečajeve preko API-ja
     const fetchRates = async () => {
-      const response = await fetch(
-        `https://api.exchangerate.host/latest?base=${selectedCurrency1}&symbols=${selectedCurrency2}`
-        );
-      const rates = await response.json();
-    
-      // izračunamo konvertirani iznos
-      const rate = rates.rates[selectedCurrency2];
-      const converted = (amount * rate).toFixed(2);
-    
-      setConvertedAmount(converted);
+      if (!amount) return;
+      try {
+        const response = await fetch(`https://api.apilayer.com/currency_data/convert?to=${selectedCurrency2}&from=${selectedCurrency1}&amount=${amount}`, {
+          method: 'GET',
+          headers: {
+            'apikey': apiKey
+          }
+        });
+        const data = await response.json();
+        setConvertedAmount(data.result);
+      } catch (error) {
+        console.error("Error fetching conversion:", error);
+      }
     };
+
     fetchRates();
-  }, [selectedCurrency1, selectedCurrency2, amount]);
+  }, [selectedCurrency1, selectedCurrency2, amount, apiKey]);
 
+  useEffect(() => {
+    const fetchCurrencies = async () => {
+      try {
+        const response = await fetch("https://api.apilayer.com/currency_data/list", {
+          method: 'GET',
+          headers: {
+            'apikey': apiKey
+          }
+        });
+        const data = await response.json();
+        setCurrencies(Object.keys(data.currencies));
+      } catch (error) {
+        console.error("Error fetching currencies:", error);
+      }
+    };
 
+    fetchCurrencies();
+  }, [apiKey]);
 
-  //  // funkcija za zamjenu valuta
   const handleSwitch = () => {
-    // zamijenimo odabrane valute
     setSelectedCurrency1(selectedCurrency2);
     setSelectedCurrency2(selectedCurrency1);
   };
 
-
-
   return (
-    <div>
+    <div className="App">
       <label>
         Iznos:
         <input
-           placeholder='unesite iznos'
-           type="number"
-           value={amount}
-           onChange={e => setAmount(e.target.value)}   
+          placeholder="Unesite iznos"
+          type="number"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
         />
-        </label>
+      </label>
 
       <br />
 
@@ -66,26 +73,29 @@ const App = () => {
         Valuta 1:
         <select
           value={selectedCurrency1}
-          onChange={e => setSelectedCurrency1(e.target.value)}>
-          {currencies.map(currency => (
-
+          onChange={(e) => setSelectedCurrency1(e.target.value)}
+        >
+          {currencies.map((currency) => (
             <option key={currency} value={currency}>
               {currency}
             </option>
           ))}
         </select>
       </label>
+
       <br />
-      <button onClick={handleSwitch}>&#8660;</button>
+
+      <button onClick={handleSwitch}>⇔</button>
+
       <br />
 
       <label>
         Valuta 2:
         <select
           value={selectedCurrency2}
-          onChange={e => setSelectedCurrency2(e.target.value)}
-            >
-           {currencies.map(currency => (
+          onChange={(e) => setSelectedCurrency2(e.target.value)}
+        >
+          {currencies.map((currency) => (
             <option key={currency} value={currency}>
               {currency}
             </option>
@@ -95,14 +105,12 @@ const App = () => {
 
       <br />
       <br />
-      
-      <p>Konvertirani iznos: <input readOnly  defaultValue={convertedAmount.toLocaleString('en-US', { minimumFractionDigits: 2, useGrouping: true })} /></p>
 
-
-
+      <p className="iznos">
+        Konvertirani iznos: {Number(convertedAmount).toFixed(3)} {selectedCurrency2}
+      </p>
     </div>
   );
 };
 
 export default App;
-
